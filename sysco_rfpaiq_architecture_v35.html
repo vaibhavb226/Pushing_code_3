@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sysco RFP AIQ — Solution Architecture v35</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #eef1f6;
+    padding: 8px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  .canvas {
+    position: relative;
+    width: 1240px;
+    height: 760px;
+    background: #fbfcfe;
+    background-image: radial-gradient(circle at 1px 1px, rgba(15,23,42,.045) 1px, transparent 0);
+    background-size: 26px 26px;
+    border-radius: 20px;
+    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 12px 44px rgba(15,23,42,.16);
+    overflow: hidden;
+    border: 1px solid rgba(15,23,42,.06);
+  }
+  .arrows { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4; }
+  .platform { position:absolute; border-radius:16px; overflow:hidden; z-index:2; display:flex; flex-direction:column; }
+  .ptitle { display:flex; align-items:center; gap:8px; padding:9px 14px; color:#fff; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; }
+  .pbody { padding:9px; display:flex; flex-direction:column; gap:7px; flex:1; min-height:0; }
+  .card { display:flex; align-items:center; gap:9px; background:#fff; border:1px solid #e6e9ef; border-radius:10px; padding:7px 10px; box-shadow:0 1px 2px rgba(15,23,42,.06); }
+  .chip { width:28px; height:28px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:7px; }
+  .cname { font-size:10.5px; font-weight:600; color:#1e293b; }
+  .csub { font-size:8.5px; color:#64748b; font-weight:400; display:block; margin-top:1px; }
+  .cc { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:3px; background:#fff; border:1px solid #e6e9ef; border-radius:10px; padding:7px 5px; box-shadow:0 1px 2px rgba(15,23,42,.05); }
+  .slabel { font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding-bottom:4px; border-bottom:1px solid rgba(0,0,0,.08); margin-bottom:2px; }
+  .gbar { background:linear-gradient(180deg,#1d6fd6,#175fc0); border-radius:9px; padding:8px 12px; display:flex; align-items:center; gap:8px; color:#fff; font-size:10.5px; font-weight:700; box-shadow:0 3px 10px rgba(29,111,214,.3); flex-shrink:0; }
+  .gbadge { font-size:8.5px; background:rgba(255,255,255,.18); border-radius:5px; padding:2px 7px; font-weight:600; }
+  .ipanel { border-radius:11px; overflow:hidden; display:flex; flex-direction:column; border:1.5px solid; }
+  .iptitle { display:flex; align-items:center; gap:7px; padding:6px 10px; color:#fff; font-size:9.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; }
+  .ipbody { padding:7px; display:flex; flex-direction:column; gap:5px; flex:1; }
+  .sm-card { display:flex; align-items:center; gap:7px; background:#fff; border:1px solid #e6e9ef; border-radius:7px; padding:5px 7px; box-shadow:0 1px 2px rgba(15,23,42,.05); }
+  .sm-chip { width:22px; height:22px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:5px; }
+  .sm-name { font-size:10px; font-weight:600; color:#1e293b; }
+  .sm-sub { font-size:8px; color:#64748b; display:block; margin-top:1px; }
+  .cir { position:absolute; border-radius:50%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:6; box-shadow:0 2px 10px rgba(0,0,0,.13); border:2px solid; gap:2px; }
+  .cir-lbl { font-size:6.5px; font-weight:800; letter-spacing:.04em; text-align:center; line-height:1.3; text-transform:uppercase; }
+  .pill { position:absolute; background:#fff; border:1.5px solid; border-radius:20px; padding:4px 10px; font-size:9px; font-weight:700; text-align:center; line-height:1.3; z-index:6; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+  .ubadge { position:absolute; z-index:6; display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:28px; color:#fff; box-shadow:0 6px 16px rgba(15,23,42,.28); }
+  /* vector icons */
+  .ic { fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; display:block; flex-shrink:0; }
+  .ic.fill { fill:currentColor; stroke:none; }
+</style>
+</head>
+<body>
+
+<!-- ICON LIBRARY -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19.5c0-3.7 2.9-6 6.5-6s6.5 2.3 6.5 6"/></symbol>
+    <symbol id="i-supplier" viewBox="0 0 24 24"><path d="M3 21V9l6 3V9l6 3.2V6h5v15z"/><path d="M2 21h20"/><path d="M6.5 16h2M11.5 16h2M16.5 16h2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17.2" cy="7.6" r="2.3"/><path d="M15.8 13.4c2.4.3 4.2 2.2 4.2 4.6"/></symbol>
+    <symbol id="i-web" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.2"/><path d="M3 9h18"/><circle cx="6" cy="6.5" r=".7" class="fill"/><circle cx="8.3" cy="6.5" r=".7" class="fill"/></symbol>
+    <symbol id="i-portal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3.2 3.6 3.2 14.4 0 18M12 3c-3.2 3.6-3.2 14.4 0 18"/></symbol>
+    <symbol id="i-bids" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2.2"/><rect x="9" y="2.4" width="6" height="3.2" rx="1"/><path d="M8.5 10.5h7M8.5 14h7M8.5 17.5h4"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 2.5h7.5L18 7v14.5H6z"/><path d="M13.5 2.5V7H18"/><path d="M9 12h6M9 15.5h6"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-ai" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2.4"/><circle cx="12" cy="12" r="2.4"/><path d="M9.5 3v3.5M14.5 3v3.5M9.5 17.5V21M14.5 17.5V21M3 9.5h3.5M3 14.5h3.5M17.5 9.5H21M17.5 14.5H21"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 4H4a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 4 16h3v4l4.2-4H20a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 20 4z"/><path d="M7 9h10M7 12h6"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 4v16h16"/><rect x="7.5" y="12" width="2.6" height="5"/><rect x="12" y="8" width="2.6" height="9"/><rect x="16.5" y="14" width="2.6" height="3"/></symbol>
+    <symbol id="i-dollar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M14.5 9.2c0-1.2-1.1-2-2.5-2s-2.5.8-2.5 2 .9 1.7 2.5 2 2.5.9 2.5 2-1.1 2-2.5 2-2.5-.8-2.5-2"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M3.6 6.5 12 12.8l8.4-6.3"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L3 10.5l6.5 2.5L12 20l3-7z"/><path d="M21 3 9.5 13"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13l3.5-8h11L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.4l2.4 2.4 4.7-5.3"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18.5 16V10a6.5 6.5 0 1 0-13 0v6l-2 2.5h17z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.5 11a8.5 8.5 0 1 0-.9 4.2"/><path d="M20.5 4.5V11h-6.5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.6-4.6"/></symbol>
+    <symbol id="i-llm" viewBox="0 0 24 24"><path d="M11.5 3l1.9 4.9 4.9 1.6-4.9 1.9L11.5 16l-1.9-4.6L4.7 9.5l4.9-1.6z"/><path d="M18 15l.9 2.4 2.4.9-2.4.9L18 21.5l-.9-2.3-2.4-.9 2.4-.9z"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5h10a4.2 4.2 0 0 0 .6-8.35A6.2 6.2 0 0 0 5.9 9.6 3.7 3.7 0 0 0 7 18.5z"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></symbol>
+    <symbol id="i-storage" viewBox="0 0 24 24"><path d="M5.2 7.5h13.6l-1.2 12a1 1 0 0 1-1 .9H7.4a1 1 0 0 1-1-.9z"/><ellipse cx="12" cy="7.2" rx="6.8" ry="2.2"/></symbol>
+    <symbol id="i-iam" viewBox="0 0 24 24"><path d="M12 3l7 3v5.2c0 4.4-3 7.9-7 9.8-4-1.9-7-5.4-7-9.8V6z"/><rect x="9.4" y="11.2" width="5.2" height="4.3" rx="1"/><path d="M10.4 11.2v-1.3a1.6 1.6 0 0 1 3.2 0v1.3"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="1.6"/><rect x="4" y="13" width="16" height="7" rx="1.6"/><circle cx="8" cy="7.5" r=".8" class="fill"/><circle cx="8" cy="16.5" r=".8" class="fill"/></symbol>
+    <symbol id="i-gateway" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="2.2"/><path d="M6.5 12h8"/><path d="M13 9l3 3-3 3"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-build" viewBox="0 0 24 24"><path d="M14.7 6.3a3.5 3.5 0 0 0-4.6 4.2l-6 6 2.1 2.1 6-6a3.5 3.5 0 0 0 4.2-4.6l-2.1 2.1-1.8-1.8z"/></symbol>
+    <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2M9 15l-3-3c1-5 5-9 12-9 0 7-4 11-9 12l-3-3z"/><circle cx="14.5" cy="9.5" r="1.4"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M12 16V4M7.5 8.5 12 4l4.5 4.5"/></symbol>
+  </defs>
+</svg>
+
+<!-- PAGE HEADER -->
+<div style="width:1240px;max-width:100%;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(145deg,#ea6a2e,#d9531c);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(217,83,28,.35);">
+      <span style="color:#fff;font-weight:800;font-size:13px;">A</span>
+    </div>
+    <div>
+      <span style="font-weight:800;font-size:16px;letter-spacing:-.01em;color:#0f172a;">SYSCO RFP AIQ — SOLUTION ARCHITECTURE DIAGRAM</span>
+      <span style="font-size:10px;color:#94a3b8;margin-left:12px;">AI-Powered Procurement · Sysco × EXL · GCP Hosted</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;padding:5px 11px;border-radius:7px;background:rgba(217,83,28,.1);border:1px solid rgba(217,83,28,.35);">
+    <span style="width:6px;height:6px;border-radius:50%;background:#d9531c;box-shadow:0 0 0 3px rgba(217,83,28,.2);"></span>
+    <span style="font-size:10px;font-weight:700;letter-spacing:.1em;color:#c2461a;">CONFIDENTIAL</span>
+  </div>
+</div>
+
+<div class="canvas">
+
+  <!-- ═══ SVG ARROWS ═══ -->
+  <svg class="arrows">
+    <defs>
+      <marker id="ag" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#94a3b8"/></marker>
+      <marker id="an" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#0f9d78"/></marker>
+      <marker id="ab" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#2563eb"/></marker>
+      <marker id="as" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#334155"/></marker>
+      <marker id="as-sm" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><polygon points="0 0,5 2,0 4" fill="#334155"/></marker>
+      <marker id="an-sm" markerWidth="5" markerHeight="4" refX="4" refY="2" orient="auto"><polygon points="0 0,5 2,0 4" fill="#0f9d78"/></marker>
+    </defs>
+
+    <!-- COE Team ↓ Frontend -->
+    <line x1="115" y1="50" x2="115" y2="80" stroke="#334155" stroke-width="2" marker-end="url(#as-sm)"/>
+    <!-- Suppliers ↓ Core -->
+    <line x1="556" y1="50" x2="556" y2="80" stroke="#0f9d78" stroke-width="2" marker-end="url(#an-sm)"/>
+    <!-- Core → AI/LLM -->
+    <line x1="874" y1="184" x2="971" y2="184" stroke="#d9531c" stroke-width="2.5"/>
+    <!-- Core → GCP -->
+    <line x1="874" y1="411" x2="971" y2="411" stroke="#1a73e8" stroke-width="2.5"/>
+    <!-- Core → Deployment -->
+    <line x1="874" y1="648" x2="971" y2="648" stroke="#4f46e5" stroke-width="2.5"/>
+  </svg>
+
+  <!-- USER BADGES -->
+  <div class="ubadge" style="top:16px;left:26px;background:linear-gradient(145deg,#334155,#1e293b);">
+    <svg class="ic" style="width:16px;height:16px;color:#fff;"><use href="#i-user"/></svg>
+    <span style="font-size:11.5px;font-weight:700;">Bid COE Team</span>
+    <span style="font-size:9px;font-weight:500;opacity:.7;">Sysco Internal</span>
+  </div>
+  <div class="ubadge" style="top:16px;left:452px;background:linear-gradient(145deg,#12b886,#0f9d78);">
+    <svg class="ic" style="width:16px;height:16px;color:#fff;"><use href="#i-supplier"/></svg>
+    <span style="font-size:11.5px;font-weight:700;">Suppliers</span>
+    <span style="font-size:9px;font-weight:500;opacity:.8;">External Vendors</span>
+  </div>
+
+  <!-- FRONTEND -->
+  <div class="platform" style="top:80px;left:20px;width:206px;bottom:20px;background:linear-gradient(180deg,#2b3a52,#243247);border:1px solid #3d4d67;box-shadow:0 8px 24px rgba(15,23,42,.22);">
+    <div class="ptitle" style="background:linear-gradient(180deg,#334155,#273244);"><svg class="ic" style="width:15px;height:15px;color:#fff;"><use href="#i-web"/></svg> PRESENTATION LAYER</div>
+    <div class="pbody">
+      <div class="slabel" style="color:#93b4d4;border-color:rgba(147,180,212,.2);">React</div>
+      <div class="card"><div class="chip" style="background:#eef2f8;"><svg class="ic" style="width:17px;height:17px;color:#3b5573;"><use href="#i-bids"/></svg></div><div><div class="cname">Bid Queue</div><span class="csub">Dashboard · Filters</span></div></div>
+      <div class="card"><div class="chip" style="background:#eef2f8;"><svg class="ic" style="width:17px;height:17px;color:#3b5573;"><use href="#i-doc"/></svg></div><div><div class="cname">Bid Detail</div></div></div>
+      <div class="card" style="background:#fff7f1;border-color:#f4b892;"><div class="chip" style="background:#fde6d6;"><svg class="ic" style="width:17px;height:17px;color:#b4531f;"><use href="#i-ai"/></svg></div><div><div class="cname">Upload RFP</div><span class="csub" style="color:#b4531f;font-weight:600;">BEX AI Parser</span></div></div>
+      <div class="card"><div class="chip" style="background:#eef2f8;"><svg class="ic" style="width:17px;height:17px;color:#3b5573;"><use href="#i-folder"/></svg></div><div><div class="cname">Document Vault</div></div></div>
+      <div class="card"><div class="chip" style="background:#eef2f8;"><svg class="ic" style="width:17px;height:17px;color:#3b5573;"><use href="#i-mail"/></svg></div><div><div class="cname">Email Repo</div><span class="csub">Thread View</span></div></div>
+      <div class="card" style="background:#f0fbf6;border:1.5px solid #86d6b3;"><div class="chip" style="background:#d8f3e6;"><svg class="ic" style="width:17px;height:17px;color:#15803d;"><use href="#i-portal"/></svg></div><div><div class="cname">Supplier Portal</div><span class="csub" style="color:#15803d;font-weight:700;">Public Access</span></div></div>
+    </div>
+  </div>
+
+  <!-- CORE PLATFORM -->
+  <div class="platform" style="top:80px;left:242px;width:632px;bottom:20px;background:#eef5ff;border:1px solid #bcd7f5;box-shadow:0 8px 24px rgba(37,99,235,.12);">
+    <div class="ptitle" style="font-size:13px;background:linear-gradient(180deg,#2f7ada,#1d6fd6);"><svg class="ic" style="width:16px;height:16px;color:#fff;"><use href="#i-bolt"/></svg> SYSCO RFP AIQ PLATFORM</div>
+    <div class="pbody">
+
+      <div class="gbar">
+        <svg class="ic" style="width:15px;height:15px;color:#fff;"><use href="#i-gateway"/></svg>
+        <span>API GATEWAY — FastAPI + Uvicorn</span>
+      </div>
+
+      <!-- CORE ROUTERS -->
+      <div style="background:rgba(255,255,255,.65);border:1px solid rgba(29,111,214,.14);border-radius:11px;padding:9px;">
+        <div class="slabel" style="color:#1d6fd6;">CORE API ROUTERS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-top:4px;">
+          <div class="cc"><svg class="ic" style="width:19px;height:19px;color:#1d6fd6;"><use href="#i-bids"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">/api/bids</span><span style="font-size:8px;color:#64748b;">Bid lifecycle</span></div>
+          <div class="cc"><svg class="ic" style="width:19px;height:19px;color:#1d6fd6;"><use href="#i-users"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">/api/suppliers</span><span style="font-size:8px;color:#64748b;">Auto-populate</span></div>
+          <div class="cc"><svg class="ic" style="width:19px;height:19px;color:#1d6fd6;"><use href="#i-mail"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">/api/emails</span><span style="font-size:8px;color:#64748b;">Thread log</span></div>
+          <div class="cc"><svg class="ic" style="width:19px;height:19px;color:#1d6fd6;"><use href="#i-folder"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">/api/documents</span><span style="font-size:8px;color:#64748b;">Vault</span></div>
+        </div>
+      </div>
+
+      <!-- AI-POWERED ROUTERS -->
+      <div style="background:linear-gradient(135deg,rgba(255,237,213,.95),rgba(255,247,237,.95));border:2px solid rgba(217,83,28,.4);border-radius:11px;padding:9px;box-shadow:0 2px 10px rgba(217,83,28,.1);">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <span style="font-size:9.5px;font-weight:800;letter-spacing:.07em;color:#b4531f;text-transform:uppercase;">AI-Powered Routers</span>
+          <span style="margin-left:auto;font-size:7.5px;font-weight:700;background:rgba(217,83,28,.15);color:#b4531f;border:1px solid rgba(217,83,28,.3);border-radius:20px;padding:2px 7px;">LLM_PROVIDER=vertexai</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;">
+          <div class="cc" style="border:1.5px solid #f4b892;background:#fff7f1;"><svg class="ic" style="width:19px;height:19px;color:#d9531c;"><use href="#i-doc"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">BEX AI</span><span style="font-size:8px;color:#b4531f;font-weight:600;">RFP Parser</span></div>
+          <div class="cc" style="border:1.5px solid #f4b892;background:#fff7f1;"><svg class="ic" style="width:19px;height:19px;color:#d9531c;"><use href="#i-dollar"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">Pricing AI</span><span style="font-size:8px;color:#b4531f;font-weight:600;">Price Match / Extract / Score</span></div>
+          <div class="cc" style="border:1.5px solid #f4b892;background:#fff7f1;"><svg class="ic" style="width:19px;height:19px;color:#d9531c;"><use href="#i-chart"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">Evaluation AI</span><span style="font-size:8px;color:#b4531f;font-weight:600;">Issue Check</span></div>
+          <div class="cc" style="border:1.5px solid #f4b892;background:#fff7f1;"><svg class="ic" style="width:19px;height:19px;color:#d9531c;"><use href="#i-chat"/></svg><span style="font-size:10px;font-weight:700;color:#1e293b;">Q&amp;A Chat</span><span style="font-size:8px;color:#b4531f;font-weight:600;">Chat Assistant</span></div>
+        </div>
+      </div>
+
+      <!-- 2×2 GRID -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:5px;flex:1;min-height:0;">
+
+        <!-- [TOP-LEFT] Email Platform -->
+        <div class="ipanel" style="border-color:rgba(15,157,120,.35);background:rgba(236,250,245,.92);">
+          <div class="iptitle" style="background:linear-gradient(180deg,#12b886,#0f9d78);"><svg class="ic" style="width:13px;height:13px;color:#fff;"><use href="#i-mail"/></svg> EMAIL PLATFORM</div>
+          <div class="ipbody">
+            <div class="sm-card" style="border:1.5px solid #86d6b3;"><div class="sm-chip" style="background:#e7f6ef;"><svg class="ic" style="width:14px;height:14px;color:#0f9d78;"><use href="#i-building"/></svg></div><div><div class="sm-name">Microsoft 365</div><span class="sm-sub">Graph API · MSAL OAuth2 · Mail.ReadWrite</span></div></div>
+            <div class="sm-card"><div class="sm-chip" style="background:#e7f6ef;"><svg class="ic" style="width:14px;height:14px;color:#0f9d78;"><use href="#i-send"/></svg></div><div><div class="sm-name">Solicitation Send</div><span class="sm-sub">Bid requests · award notices</span></div></div>
+            <div class="sm-card"><div class="sm-chip" style="background:#e7f6ef;"><svg class="ic" style="width:14px;height:14px;color:#0f9d78;"><use href="#i-inbox"/></svg></div><div><div class="sm-name">Poll &amp; Track Replies</div><span class="sm-sub">IMAP · mark-read · bounce detect</span></div></div>
+          </div>
+        </div>
+
+        <!-- [TOP-RIGHT] Supplier Portal -->
+        <div class="ipanel" style="border-color:rgba(15,157,120,.3);background:rgba(236,250,245,.9);">
+          <div class="iptitle" style="background:linear-gradient(180deg,#12b886,#0f9d78);"><svg class="ic" style="width:13px;height:13px;color:#fff;"><use href="#i-portal"/></svg> SUPPLIER PORTAL</div>
+          <div class="ipbody">
+            <div class="sm-card" style="border:1.5px solid #86d6b3;background:#f0fbf6;"><div class="sm-chip" style="background:#d8f3e6;"><svg class="ic" style="width:14px;height:14px;color:#15803d;"><use href="#i-portal"/></svg></div><div><div class="sm-name">/api/submit/:bidId</div><span class="sm-sub" style="color:#15803d;font-weight:700;">Public Submission</span></div></div>
+            <div class="sm-card"><div class="sm-chip" style="background:#d8f3e6;"><svg class="ic" style="width:14px;height:14px;color:#15803d;"><use href="#i-upload"/></svg></div><div><div class="sm-name">Quote Upload</div><span class="sm-sub">PDF · DOCX · XLSX · Images</span></div></div>
+            <div class="sm-card"><div class="sm-chip" style="background:#d8f3e6;"><svg class="ic" style="width:14px;height:14px;color:#15803d;"><use href="#i-check"/></svg></div><div><div class="sm-name">Submission Intake</div><span class="sm-sub">bidId → SubmissionsRepository</span></div></div>
+          </div>
+        </div>
+
+        <!-- [BOTTOM-LEFT] Background Services -->
+        <div class="ipanel" style="border-color:rgba(109,40,217,.3);background:rgba(245,243,255,.85);">
+          <div class="iptitle" style="background:linear-gradient(180deg,#7c3aed,#6d28d9);"><svg class="ic" style="width:13px;height:13px;color:#fff;"><use href="#i-refresh"/></svg> BACKGROUND SERVICES</div>
+          <div class="ipbody">
+            <div class="sm-card" style="border:1.5px solid #cbb4f2;"><div class="sm-chip" style="background:#ede9fe;"><svg class="ic" style="width:14px;height:14px;color:#6d28d9;"><use href="#i-inbox"/></svg></div><div><div class="sm-name">Email Poller</div><span class="sm-sub">Frequently checking · 3-tier bid match</span></div></div>
+            <div class="sm-card" style="border:1.5px solid #cbb4f2;"><div class="sm-chip" style="background:#ede9fe;"><svg class="ic" style="width:14px;height:14px;color:#6d28d9;"><use href="#i-bell"/></svg></div><div><div class="sm-name">Auto-Reminder</div><span class="sm-sub">Hourly · APScheduler · 3-day gap</span></div></div>
+            <div class="sm-card" style="border:1.5px solid #cbb4f2;"><div class="sm-chip" style="background:#ede9fe;"><svg class="ic" style="width:14px;height:14px;color:#6d28d9;"><use href="#i-refresh"/></svg></div><div><div class="sm-name">Backfill Tasks</div><span class="sm-sub">Missing-field patch on startup</span></div></div>
+          </div>
+        </div>
+
+        <!-- [BOTTOM-RIGHT] RAG Pipeline -->
+        <div class="ipanel" style="border-color:rgba(124,58,237,.35);background:rgba(245,243,255,.9);">
+          <div class="iptitle" style="background:linear-gradient(180deg,#7c3aed,#6d28d9);"><svg class="ic" style="width:13px;height:13px;color:#fff;"><use href="#i-llm"/></svg> RAG PIPELINE</div>
+          <div class="ipbody">
+            <div class="sm-card"><div class="sm-chip" style="background:#ede9fe;"><svg class="ic" style="width:14px;height:14px;color:#6d28d9;"><use href="#i-doc"/></svg></div><div><div class="sm-name">Document Loader</div><span class="sm-sub">PDF · DOCX · XLSX · Images</span></div></div>
+            <div class="sm-card"><div class="sm-chip" style="background:#ede9fe;"><svg class="ic" style="width:14px;height:14px;color:#6d28d9;"><use href="#i-ai"/></svg></div><div><div class="sm-name">Embeddings</div><span class="sm-sub">Text Embedding</span></div></div>
+            <div class="sm-card"><div class="sm-chip" style="background:#ede9fe;"><svg class="ic" style="width:14px;height:14px;color:#6d28d9;"><use href="#i-search"/></svg></div><div><div class="sm-name">Retrieval + Generation</div><span class="sm-sub">LLM Model · Structured JSON</span></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /Core -->
+
+  <!-- AI / LLM -->
+  <div class="platform" style="top:80px;right:20px;width:248px;height:208px;background:#fff4ec;border:1px solid #f6c9a8;box-shadow:0 8px 24px rgba(217,83,28,.14);">
+    <div class="ptitle" style="background:linear-gradient(180deg,#ea6a2e,#d9531c);"><svg class="ic" style="width:15px;height:15px;color:#fff;"><use href="#i-llm"/></svg> AI / LLM PLATFORM</div>
+    <div class="pbody">
+      <div class="card"><div class="chip" style="background:#fde6d6;"><svg class="ic" style="width:17px;height:17px;color:#c1440e;"><use href="#i-ai"/></svg></div><div><div class="cname">Anthropic Claude</div></div></div>
+      <div class="card"><div class="chip" style="background:#e9e9e9;"><svg class="ic" style="width:17px;height:17px;color:#3a3a3a;"><use href="#i-ai"/></svg></div><div><div class="cname">OpenAI</div></div></div>
+      <div class="card" style="background:#f0fbf6;border:1.5px solid #34b37e;box-shadow:0 0 0 3px rgba(52,179,126,.12);">
+        <div class="chip" style="background:#d8f3e6;"><svg class="ic" style="width:17px;height:17px;color:#15803d;"><use href="#i-llm"/></svg></div>
+        <div style="flex:1;min-width:0;"><div class="cname">Google Vertex AI</div></div>
+        <span style="flex-shrink:0;font-size:7.5px;font-weight:700;color:#15803d;background:#d8f3e6;border:1px solid #86d6b3;border-radius:20px;padding:2px 5px;">✓ DEFAULT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GCP -->
+  <div class="platform" style="top:296px;right:20px;width:248px;height:252px;background:#eef4fe;border:1px solid #bcd3f7;box-shadow:0 8px 24px rgba(26,115,232,.14);">
+    <div class="ptitle" style="background:linear-gradient(180deg,#4285f4,#1a73e8);"><svg class="ic" style="width:15px;height:15px;color:#fff;"><use href="#i-cloud"/></svg> GCP CLOUD PLATFORM</div>
+    <div class="pbody" style="gap:7px;">
+      <div class="card" style="border-color:#a9c9f5;"><div class="chip" style="background:#e3edfd;"><svg class="ic" style="width:17px;height:17px;color:#1a73e8;"><use href="#i-server"/></svg></div><div><div class="cname">Compute Engine</div><span class="csub">VM · App Host</span></div></div>
+      <div class="card" style="border-color:#a9c9f5;"><div class="chip" style="background:#e3edfd;"><svg class="ic" style="width:17px;height:17px;color:#1a73e8;"><use href="#i-iam"/></svg></div><div><div class="cname">Cloud IAM &amp; Admin</div><span class="csub">Service accounts · roles</span></div></div>
+      <div class="card" style="border-color:#a9c9f5;"><div class="chip" style="background:#e3edfd;"><svg class="ic" style="width:17px;height:17px;color:#1a73e8;"><use href="#i-db"/></svg></div><div><div class="cname">Cloud SQL</div><span class="csub">Managed PostgreSQL · asyncpg</span></div></div>
+      <div class="card" style="border-color:#a9c9f5;"><div class="chip" style="background:#e3edfd;"><svg class="ic" style="width:17px;height:17px;color:#1a73e8;"><use href="#i-storage"/></svg></div><div><div class="cname">Cloud Storage</div><span class="csub">GCS bucket · uploads</span></div></div>
+    </div>
+  </div>
+
+  <!-- DEPLOYMENT -->
+  <div class="platform" style="top:556px;right:20px;width:248px;height:184px;background:#eef0ff;border:1px solid #c0c4f5;box-shadow:0 8px 24px rgba(79,70,229,.14);">
+    <div class="ptitle" style="background:linear-gradient(180deg,#6366f1,#4f46e5);"><svg class="ic" style="width:15px;height:15px;color:#fff;"><use href="#i-rocket"/></svg> DEPLOYMENT</div>
+    <div class="pbody" style="gap:7px;">
+      <div class="card" style="border-color:#c0c4f5;"><div class="chip" style="background:#e2e4fb;"><svg class="ic" style="width:17px;height:17px;color:#4f46e5;"><use href="#i-build"/></svg></div><div><div class="cname">Jenkins CI/CD Pipeline</div><span class="csub" style="color:#4f46e5;font-weight:600;">Build → Test → Deploy</span></div></div>
+    </div>
+  </div>
+
+  <!-- CIRCLE CONNECTORS -->
+  <div class="cir" style="width:52px;height:52px;top:158px;right:292px;border-color:#d9531c;color:#d9531c;">
+    <svg class="ic" style="width:20px;height:20px;color:#d9531c;"><use href="#i-ai"/></svg>
+    <span class="cir-lbl">AI<br>Calls</span>
+  </div>
+  <div class="cir" style="width:52px;height:52px;top:385px;right:292px;border-color:#1a73e8;color:#1a73e8;">
+    <svg class="ic" style="width:20px;height:20px;color:#1a73e8;"><use href="#i-cloud"/></svg>
+    <span class="cir-lbl">GCP<br>Host</span>
+  </div>
+  <div class="cir" style="width:52px;height:52px;top:622px;right:292px;border-color:#4f46e5;color:#4f46e5;">
+    <svg class="ic" style="width:20px;height:20px;color:#4f46e5;"><use href="#i-rocket"/></svg>
+    <span class="cir-lbl">Deploy</span>
+  </div>
+
+  <!-- REGULAR PILLS -->
+  <div class="pill" style="top:260px;left:186px;border-color:#2563eb;color:#2563eb;">REST / HTTP<br>Vite Proxy</div>
+
+</div><!-- /canvas -->
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sysco RFP AIQ — Architecture Diagram v3</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI', Arial, Helvetica, sans-serif; background:#fff; padding:30px 36px;
+         display:flex; flex-direction:column; align-items:flex-start; color:#111; -webkit-font-smoothing:antialiased; }
+  h1 { font-size:29px; font-weight:800; color:#12253d; letter-spacing:-.01em; margin-bottom:26px; }
+
+  .canvas { position:relative; width:1240px; height:800px; }
+
+  .ic { width:100%; height:100%; display:block; }
+
+  /* a self-contained icon+label unit; auto-sizes to its content, never clips */
+  .item { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; }
+  .item .ic-box { width:52px; height:52px; flex-shrink:0; }
+  .item .cap { font-size:12.5px; font-weight:700; color:#1a1a1a; line-height:1.35; }
+  .cap.sm { font-size:11px; font-weight:600; color:#333; }
+
+  /* perimeter nodes */
+  .pnode { position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:14px; }
+  .pnode.dashed { border:1.6px dashed #e59a9a; border-radius:16px; }
+  .pnode.solid { border:1.6px solid #9aa0a6; background:#f5f6f7; border-radius:16px; }
+  .eyebrow { font-size:9.5px; font-weight:700; color:#c0392b; line-height:1.3; margin-bottom:2px; }
+
+  /* main GCP boundary + inner boxes */
+  .box { position:absolute; border:1.7px solid #1a1a1a; background:#fff; }
+  .box.rounded { border-radius:20px; }
+  .box.dashed { border-style:dashed; border-color:#333; }
+  .cap-head { position:absolute; font-size:14.5px; font-weight:800; color:#12253d; }
+  .cap { font-size:12.5px; font-weight:700; color:#1a1a1a; line-height:1.35; }
+
+  .row { display:flex; align-items:flex-start; justify-content:center; }
+
+  svg.wires { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5; }
+</style>
+</head>
+<body>
+
+<h1>Architecture Diagram</h1>
+
+<div class="canvas">
+
+  <!-- ICON LIBRARY -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="#8a8f98" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/></symbol>
+      <symbol id="i-dns" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="6.5" rx="1.4" fill="#c9ccd1" stroke="#8a8f98" stroke-width="1"/><rect x="4" y="13.5" width="16" height="6.5" rx="1.4" fill="#c9ccd1" stroke="#8a8f98" stroke-width="1"/><circle cx="7.2" cy="7.2" r="1" fill="#6b7280"/><circle cx="7.2" cy="16.7" r="1" fill="#6b7280"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 20 6v6c0 5-3.4 8.8-8 9.5-4.6-.7-8-4.5-8-9.5V6z" fill="#2a4d8f"/><path d="M12 2.5 20 6v6c0 5-3.4 8.8-8 9.5" fill="#1c3a70"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="#0f9d58"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" fill="none" stroke="#0f9d58" stroke-width="2"/></symbol>
+      <symbol id="i-server" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="1.6" fill="#4285f4"/><rect x="4" y="13" width="16" height="7" rx="1.6" fill="#aecbfa"/><circle cx="7.4" cy="7.5" r="1.1" fill="#fff"/><circle cx="7.4" cy="16.5" r="1.1" fill="#2f5fc4"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.2" fill="#fbbc04"/><path d="M3.6 6.3 12 12.6l8.4-6.3" fill="none" stroke="#fff" stroke-width="1.6"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M11.5 2.5 13.6 8.4 19.5 10.5 13.6 12.6 11.5 18.5 9.4 12.6 3.5 10.5 9.4 8.4z" fill="#4285f4"/><path d="M18 15l.8 2.2 2.2.8-2.2.8L18 21l-.8-2.2-2.2-.8 2.2-.8z" fill="#34a853"/></symbol>
+      <symbol id="i-elephant" viewBox="0 0 24 24"><ellipse cx="12" cy="14" rx="8" ry="6.5" fill="#336791"/><circle cx="9" cy="10.5" r="1.1" fill="#fff"/><path d="M4 13c-1.6.2-2.6 1.7-2.2 3.2" fill="none" stroke="#336791" stroke-width="1.6" stroke-linecap="round"/><path d="M12 20.5v2M15 20.5v2" stroke="#336791" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="i-bucket" viewBox="0 0 24 24"><path d="M5 7h14l-1.4 12.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8z" fill="#4285f4"/><ellipse cx="12" cy="7" rx="7" ry="2.3" fill="#aecbfa"/></symbol>
+      <symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.3" fill="#f4732a"/><circle cx="6" cy="18" r="2.3" fill="#f4732a"/><circle cx="17" cy="12" r="2.3" fill="#f4732a"/><path d="M6 8.3V18M6 8.3C6 12 9 12 14.7 12" fill="none" stroke="#f4732a" stroke-width="1.8"/></symbol>
+      <symbol id="i-docker" viewBox="0 0 24 24"><rect x="3" y="10" width="3" height="3" fill="#2496ed"/><rect x="7" y="10" width="3" height="3" fill="#2496ed"/><rect x="11" y="10" width="3" height="3" fill="#2496ed"/><rect x="7" y="6.3" width="3" height="3" fill="#2496ed"/><rect x="11" y="6.3" width="3" height="3" fill="#2496ed"/><path d="M2 13.2c0 4 3.4 6.3 8.6 6.3 6.6 0 10.7-3 12.2-7.7-1-.6-2.3-.8-3.4-.4-.3-1-1.1-1.8-2.1-2.2-.3.9-.2 1.9.3 2.7-1.3.4-3.6.4-5 0H2z" fill="#2496ed"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="#5b6472" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4 5.3 5.3" stroke="#5b6472" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="i-infinity" viewBox="0 0 24 24"><path d="M7 8.5a4 4 0 1 0 0 7c2.6 0 3.6-2.2 5-4.5s2.4-4.5 5-4.5a4 4 0 1 1 0 7c-2.6 0-3.6-2.2-5-4.5S9.6 5 7 5" fill="none" stroke="#4285f4" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- ══════════════ PERIMETER (left column) ══════════════ -->
+  <!-- WAF -->
+  <div class="pnode" style="left:24px; top:150px; width:150px;">
+    <div class="eyebrow">Cloud WAF / CDN edge</div>
+    <div class="ic-box"><svg class="ic"><use href="#i-shield"/></svg></div>
+    <div class="cap">WAF / CDN</div>
+  </div>
+
+  <!-- DNS -->
+  <div class="pnode solid" style="left:34px; top:340px; width:130px;">
+    <div class="ic-box" style="width:34px;height:34px;"><svg class="ic"><use href="#i-dns"/></svg></div>
+    <div class="cap">Domain Name<br/>Servers</div>
+  </div>
+
+  <!-- Users -->
+  <div class="pnode dashed" style="left:44px; top:492px; width:110px;">
+    <div class="ic-box"><svg class="ic"><use href="#i-user"/></svg></div>
+    <div class="cap">Users</div>
+  </div>
+
+  <!-- SSL, floating between WAF and the GCP boundary -->
+  <div class="pnode" style="left:246px; top:158px; width:120px;">
+    <div class="ic-box"><svg class="ic"><use href="#i-lock"/></svg></div>
+    <div class="cap">SSL Certificate</div>
+  </div>
+  <div class="cap sm" style="position:absolute; left:206px; top:150px;">https</div>
+  <div class="cap sm" style="position:absolute; left:368px; top:178px; width:40px; text-align:center;">port</div>
+
+  <!-- ══════════════ GCP BOUNDARY ══════════════ -->
+  <div class="box" style="left:404px; top:96px; width:800px; height:650px;"></div>
+  <div class="cap-head" style="left:426px; top:70px;">GCP</div>
+
+  <!-- App / AI dashed box -->
+  <div class="box dashed" style="left:452px; top:154px; width:340px; min-height:280px; padding:26px 18px; display:flex; flex-direction:column; align-items:stretch; gap:22px;">
+    <div class="row" style="gap:36px;">
+      <div class="item" style="width:150px;">
+        <div class="ic-box"><svg class="ic"><use href="#i-server"/></svg></div>
+        <div class="cap">App deployed via<br/>FastAPI + React<br/>on Cloud Run</div>
+      </div>
+      <div class="item" style="width:130px;">
+        <div class="ic-box"><svg class="ic"><use href="#i-spark"/></svg></div>
+        <div class="cap">Vertex AI as<br/>the LLM<br/>interface</div>
+      </div>
+    </div>
+    <div class="row" style="gap:36px; margin-top:8px;">
+      <div class="item" style="width:150px;">
+        <div class="ic-box" style="width:40px;height:40px;"><svg class="ic"><use href="#i-mail"/></svg></div>
+        <div class="cap">Email Notification<br/>Service via<br/>Graph API</div>
+      </div>
+      <div class="item" style="width:130px;">
+        <div class="cap sm">SQL Query Expert<br/>(text &#8594; SQL on<br/>Cloud SQL)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Storage box -->
+  <div class="box rounded" style="left:842px; top:130px; width:330px; min-height:300px; padding:22px 20px;">
+    <div class="cap" style="text-align:left; font-size:15px; margin-bottom:16px;">Storage</div>
+    <div class="box dashed" style="position:static; width:100%; min-height:130px; padding:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+      <div class="cap" style="text-align:left; align-self:flex-start; font-size:13.5px;">Backend DB</div>
+      <div class="row" style="gap:16px; align-items:center;">
+        <div class="ic-box" style="width:46px;height:46px; flex-shrink:0;"><svg class="ic"><use href="#i-elephant"/></svg></div>
+        <div class="cap sm" style="text-align:left; width:190px;">PostgreSQL / SQLite<br/>as backend DB<br/>(JSON default)</div>
+      </div>
+    </div>
+    <div class="row" style="gap:16px; align-items:center; margin-top:26px;">
+      <div class="ic-box" style="width:42px;height:42px; flex-shrink:0;"><svg class="ic"><use href="#i-bucket"/></svg></div>
+      <div class="cap sm" style="text-align:left; width:220px;">Cloud Storage for uploaded<br/>RFP &amp; bid documents</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ DevOps layer ══════════════ -->
+  <div class="box dashed" style="left:452px; top:612px; width:720px; min-height:104px; padding:16px 26px; display:flex; align-items:center; gap:34px;">
+    <div class="cap" style="font-size:14.5px; color:#12253d;">DevOps Layer</div>
+    <div class="ic-box" style="width:38px;height:38px;"><svg class="ic"><use href="#i-git"/></svg></div>
+    <div class="ic-box" style="width:38px;height:38px;"><svg class="ic"><use href="#i-docker"/></svg></div>
+    <div class="ic-box" style="width:38px;height:38px;"><svg class="ic"><use href="#i-gear"/></svg></div>
+    <div class="cap sm" style="text-align:left; width:280px;">CI/CD Pipelines · Controlled Deployment<br/>Terraform · Docker · Jenkins</div>
+    <div class="ic-box" style="width:46px;height:46px; margin-left:auto;"><svg class="ic"><use href="#i-infinity"/></svg></div>
+  </div>
+
+  <!-- ══════════════ CONNECTOR WIRES ══════════════ -->
+  <svg class="wires">
+    <defs>
+      <marker id="arw" markerWidth="10" markerHeight="8" refX="7.5" refY="4" orient="auto"><path d="M0 0L9 4L0 8z" fill="#1a1a1a"/></marker>
+      <marker id="arw2" markerWidth="10" markerHeight="8" refX="7.5" refY="4" orient="auto-start-reverse"><path d="M0 0L9 4L0 8z" fill="#1a1a1a"/></marker>
+    </defs>
+    <!-- users <-> dns -->
+    <line x1="99" y1="488" x2="99" y2="448" stroke="#1a1a1a" stroke-width="1.6" marker-start="url(#arw2)" marker-end="url(#arw)"/>
+    <!-- dns <-> waf -->
+    <line x1="99" y1="336" x2="99" y2="293" stroke="#1a1a1a" stroke-width="1.6" marker-start="url(#arw2)" marker-end="url(#arw)"/>
+    <!-- waf -> ssl (https) -->
+    <line x1="184" y1="200" x2="240" y2="200" stroke="#1a1a1a" stroke-width="1.8" marker-end="url(#arw)"/>
+    <!-- ssl -> GCP boundary -->
+    <line x1="374" y1="200" x2="400" y2="200" stroke="#1a1a1a" stroke-width="1.8" marker-end="url(#arw)"/>
+    <!-- App/AI box <-> Storage box -->
+    <line x1="796" y1="290" x2="838" y2="290" stroke="#1a1a1a" stroke-width="1.8" marker-start="url(#arw2)" marker-end="url(#arw)"/>
+  </svg>
+
+</div>
+
+</body>
+</html>
