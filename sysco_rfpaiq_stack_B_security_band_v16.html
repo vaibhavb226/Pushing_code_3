@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sysco RFP AIQ — Platform Stack (B v15)</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI', Arial, Helvetica, sans-serif; background:#ffffff; color:#1f2937;
+         padding:36px 26px; display:flex; flex-direction:column; align-items:center; -webkit-font-smoothing:antialiased; }
+  .sheet { width:100%; max-width:1120px; }
+
+  .stack { display:flex; flex-direction:column; gap:4px; }
+
+  /* connector arrow between stacked layers */
+  .arrow-link { display:flex; justify-content:center; padding:2px 0; }
+  .arrow-link svg { width:22px; height:24px; }
+
+  .band { padding:18px 22px; border-radius:7px; }
+  .band-title { text-align:center; font-weight:800; font-size:19px; letter-spacing:.08em; text-transform:uppercase; color:#fff; }
+  .band-title .sfx { display:block; font-size:10px; font-weight:700; letter-spacing:.16em; color:rgba(255,255,255,.75); margin-top:3px; }
+  .row { display:flex; gap:13px; margin-top:15px; }
+  .card { flex:1; border:1.6px solid rgba(255,255,255,.9); border-radius:6px; padding:14px 8px; text-align:center;
+          font-weight:700; font-size:13.5px; color:#fff; display:flex; align-items:center; justify-content:center; min-height:52px; }
+
+  /* top gray band */
+  .top { background:#e2e5ea; }
+  .top .band-title { color:#3d434d; }
+  .top .card { border:none; background:#3a4049; font-size:15px; }
+
+  /* navy platform bands */
+  .navy { background:#123f6b; }
+
+  /* security perimeter frame — wraps the whole stack (cross-cutting) */
+  .secure-frame { position:relative; border:2.5px solid #c05a22; border-radius:16px; padding:20px 18px; margin-top:6px; }
+  /* security layer summary — sits at the end, below the frame */
+  .sec-layer { text-align:center; margin-top:20px; }
+  .sec-layer .lbl { display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:14px; letter-spacing:.11em; text-transform:uppercase; color:#c05a22; }
+  .sec-layer .lbl svg { width:16px; height:16px; stroke:#c05a22; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  .sec-layer .items { font-size:12.5px; font-weight:700; color:#b0662f; margin-top:7px; letter-spacing:.03em; }
+  @media (max-width:760px){ .sec-layer .items { font-size:10px; } }
+
+  /* infra bottom row — text only, consistently formatted */
+  .infra-row { display:flex; align-items:center; margin-top:16px; }
+  .infra-item { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; padding:0 6px; }
+  .infra-item .lbl { font-weight:700; font-size:14px; line-height:1.3; }
+  .divider { width:1.5px; align-self:stretch; background:rgba(255,255,255,.4); margin:2px 0; }
+
+  .arrow { display:flex; justify-content:center; }
+  .arrow svg { stroke:#b6bcc4; }
+
+  .foot { text-align:center; color:#9aa0a6; font-size:11px; margin-top:20px; letter-spacing:.03em; }
+
+  /* IT hand-off box — recommended security controls for the client's IT team to review/enable */
+  .it-box { margin-top:22px; border:1.6px dashed #c05a22; border-radius:10px; padding:16px 20px; background:#fff8f4; }
+  .it-box .it-title { display:flex; align-items:center; gap:8px; font-weight:800; font-size:13px; letter-spacing:.05em;
+                       text-transform:uppercase; color:#c05a22; margin-bottom:12px; }
+  .it-box .it-title svg { width:15px; height:15px; stroke:#c05a22; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  .it-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:9px; }
+  .it-chip { border:1px solid #e7c3ab; border-radius:6px; background:#fff; padding:9px 10px; }
+  .it-chip .t { font-weight:700; font-size:12px; color:#3d3128; }
+  .it-chip .d { font-size:10px; color:#8a7a6c; margin-top:2px; line-height:1.3; }
+  @media (max-width:720px){ .it-grid{ grid-template-columns:repeat(2, 1fr); } }
+
+  /* IT hand-off sub-groups (Application / Identity / Network / Data layers) */
+  .it-subgroup { margin-top:16px; }
+  .it-subgroup:first-of-type { margin-top:0; }
+  .it-sub-title { font-weight:800; font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:#a8562a; margin-bottom:8px; }
+
+  @media (max-width:720px){ .row{flex-wrap:wrap;} }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- SECURITY PERIMETER — wraps the entire stack (cross-cutting) -->
+  <div class="secure-frame">
+
+  <div class="stack">
+
+    <!-- Applications -->
+    <div class="band top">
+      <div class="band-title">Applications &amp; Services</div>
+      <div class="row">
+        <div class="card">COE Web App</div>
+        <div class="card">Supplier Portal</div>
+      </div>
+    </div>
+
+    <div class="arrow-link"><svg viewBox="0 0 22 24"><line x1="11" y1="1" x2="11" y2="15" stroke="#a7adb5" stroke-width="2"/><path d="M4 12 L11 21 L18 12" fill="none" stroke="#a7adb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- Platform -->
+    <div class="band navy">
+      <div class="band-title">RFP AIQ Platform</div>
+      <div class="row">
+        <div class="card">Bid Management</div>
+        <div class="card">Supplier Collaboration</div>
+        <div class="card">Email &amp; Automation</div>
+        <div class="card">Document Vault</div>
+        <div class="card">Q&amp;A Chat</div>
+      </div>
+    </div>
+
+    <div class="arrow-link"><svg viewBox="0 0 22 24"><line x1="11" y1="1" x2="11" y2="15" stroke="#a7adb5" stroke-width="2"/><path d="M4 12 L11 21 L18 12" fill="none" stroke="#a7adb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- AI/ML -->
+    <div class="band navy">
+      <div class="band-title">AI / ML Engine</div>
+      <div class="row">
+        <div class="card">RFP Parsing</div>
+        <div class="card">Pricing AI</div>
+        <div class="card">Evaluation AI</div>
+        <div class="card">Conversational AI</div>
+        <div class="card">RAG · Embeddings</div>
+      </div>
+    </div>
+
+    <div class="arrow-link"><svg viewBox="0 0 22 24"><line x1="11" y1="1" x2="11" y2="15" stroke="#a7adb5" stroke-width="2"/><path d="M4 12 L11 21 L18 12" fill="none" stroke="#a7adb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- Infrastructure -->
+    <div class="band navy">
+      <div class="band-title">Cloud &amp; Infrastructure</div>
+      <div class="infra-row">
+        <div class="infra-item"><span class="lbl">Cloud Run / GCP Compute Engine</span></div>
+        <div class="divider"></div>
+        <div class="infra-item"><span class="lbl">Cloud SQL</span></div>
+        <div class="divider"></div>
+        <div class="infra-item"><span class="lbl">Cloud Storage</span></div>
+        <div class="divider"></div>
+        <div class="infra-item"><span class="lbl">Vertex AI</span></div>
+        <div class="divider"></div>
+        <div class="infra-item"><span class="lbl">MS Graph</span></div>
+        <div class="divider"></div>
+        <div class="infra-item"><span class="lbl">Terraform</span></div>
+        <div class="divider"></div>
+        <div class="infra-item"><span class="lbl">Docker · Jenkins CI/CD</span></div>
+      </div>
+    </div>
+
+  </div><!-- /stack -->
+  </div><!-- /secure-frame -->
+
+  <!-- IT HAND-OFF — recommended security controls for the client's IT team -->
+  <div class="it-box">
+    <div class="it-title">
+      <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5.2c0 4.4-3 7.9-7 9.8-4-1.9-7-5.4-7-9.8V6z"/><path d="M9.4 12l1.8 1.8 3.5-3.9"/></svg>
+      Security Controls — For IT Team
+    </div>
+    <div class="it-subgroup">
+      <div class="it-sub-title">Application Layer</div>
+      <div class="it-grid">
+        <div class="it-chip"><div class="t">Cloud Armor (WAF / DDoS)</div><div class="d">Perimeter edge protection in front of Cloud Run</div></div>
+        <div class="it-chip"><div class="t">Application Authentication</div><div class="d">Request-level auth on all API routes</div></div>
+        <div class="it-chip"><div class="t">Model Armor</div><div class="d">LLM prompt-injection / unsafe-output screening</div></div>
+        <div class="it-chip"><div class="t">TLS 1.2+</div><div class="d">HTTPS enforced end-to-end</div></div>
+      </div>
+    </div>
+
+    <div class="it-subgroup">
+      <div class="it-sub-title">Identity &amp; Access Layer</div>
+      <div class="it-grid">
+        <div class="it-chip"><div class="t">Compute Engine IAM</div><div class="d">Least-privilege per VM; OS Login over static SSH/service keys</div></div>
+        <div class="it-chip"><div class="t">Workload Identity Federation</div><div class="d">Jenkins/Docker CI auth — no static service-account keys</div></div>
+        <div class="it-chip"><div class="t">Secret Manager</div><div class="d">Rotate API/DB keys — no JSON keys in code or Git</div></div>
+      </div>
+    </div>
+
+    <div class="it-subgroup">
+      <div class="it-sub-title">Network Layer</div>
+      <div class="it-grid">
+        <div class="it-chip"><div class="t">VPC Firewall Rules</div><div class="d">Restrict ingress/egress on Compute Engine</div></div>
+        <div class="it-chip"><div class="t">Cloud SQL Firewall / No Public Access</div><div class="d">Private IP, authorized networks only — no public IPs on Compute Engine or Cloud SQL</div></div>
+        <div class="it-chip"><div class="t">VPC Service Controls</div><div class="d">Network-level isolation, no data exfil</div></div>
+      </div>
+    </div>
+
+    <div class="it-subgroup">
+      <div class="it-sub-title">Data &amp; Infrastructure Layer</div>
+      <div class="it-grid">
+        <div class="it-chip"><div class="t">Cloud KMS (CMEK)</div><div class="d">Encryption for Cloud Storage &amp; Cloud SQL at rest</div></div>
+        <div class="it-chip"><div class="t">Infrastructure as Code (IaC)</div><div class="d">Terraform-managed GCP resources, encrypted GCS state backend</div></div>
+        <div class="it-chip"><div class="t">Cloud Logging &amp; Audit Trails</div><div class="d">Central logging, access audit history</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">AI-Powered Procurement Platform · GCP Hosted</div>
+
+</div>
+</body>
+</html>
